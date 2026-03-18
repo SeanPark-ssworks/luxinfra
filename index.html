@@ -404,6 +404,24 @@ body.admin-on .admin-editor { display:block; }
               cursor:pointer; line-height:1; padding:0 4px; }
 .pdf-frame  { flex:1; border:none; width:100%; background:#525659; }
 
+/* ── VIEWER GATE ── */
+.vgate-overlay { display:flex; position:fixed; inset:0; background:var(--primary);
+                 z-index:9999; align-items:center; justify-content:center; }
+.vgate-box { background:white; border-radius:14px; padding:36px 28px;
+             width:300px; text-align:center; box-shadow:0 8px 40px rgba(0,0,0,.3); }
+.vgate-logo  { font-size:40px; margin-bottom:10px; }
+.vgate-title { font-size:17px; font-weight:800; color:var(--primary); margin-bottom:4px; }
+.vgate-sub   { font-size:12px; color:var(--muted); margin-bottom:20px; }
+.vgate-in    { width:100%; padding:11px 14px; border:1.5px solid var(--border);
+               border-radius:8px; font-size:18px; text-align:center;
+               outline:none; letter-spacing:6px; margin-bottom:8px; }
+.vgate-in:focus { border-color:var(--primary); }
+.vgate-btn   { width:100%; padding:12px; background:var(--primary); color:white;
+               border:none; border-radius:8px; font-size:15px; font-weight:700;
+               cursor:pointer; margin-top:4px; }
+.vgate-btn:hover { opacity:.9; }
+.vgate-err   { color:#ef4444; font-size:12px; margin-top:6px; display:none; }
+
 /* ── RESPONSIVE ── */
 /* ── MOBILE (≤640px) ── */
 @media(max-width:640px){
@@ -493,6 +511,19 @@ body.admin-on .admin-editor { display:block; }
 </noscript>
 </head>
 <body class="">
+
+<!-- ═══ VIEWER GATE ═══ -->
+<div class="vgate-overlay" id="vgateOverlay">
+  <div class="vgate-box">
+    <div class="vgate-logo">🔐</div>
+    <div class="vgate-title">수출 제품 관리</div>
+    <div class="vgate-sub">접근 비밀번호를 입력하세요</div>
+    <input class="vgate-in" type="password" id="vgateInput" placeholder="••••"
+           onkeydown="if(event.key==='Enter')vgateConfirm()" inputmode="numeric">
+    <button class="vgate-btn" onclick="vgateConfirm()">입장</button>
+    <div class="vgate-err" id="vgateErr">비밀번호가 올바르지 않습니다</div>
+  </div>
+</div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="header">
@@ -587,6 +618,30 @@ body.admin-on .admin-editor { display:block; }
 
 
 <script>
+// ═══════════════════════════════════════
+// VIEWER GATE
+// ═══════════════════════════════════════
+const VIEWER_PW = "2026";
+function vgateConfirm(){
+  const v = document.getElementById('vgateInput').value;
+  if(v === VIEWER_PW || v === ADMIN_PW){
+    sessionStorage.setItem('vgate','ok');
+    document.getElementById('vgateOverlay').style.display='none';
+    document.getElementById('vgateInput').value='';
+  } else {
+    document.getElementById('vgateErr').style.display='block';
+    document.getElementById('vgateInput').value='';
+    document.getElementById('vgateInput').focus();
+  }
+}
+(function(){
+  if(sessionStorage.getItem('vgate')==='ok'){
+    document.getElementById('vgateOverlay').style.display='none';
+  } else {
+    setTimeout(()=>document.getElementById('vgateInput').focus(), 100);
+  }
+})();
+
 // ═══════════════════════════════════════
 // TRANSLATIONS
 // ═══════════════════════════════════════
