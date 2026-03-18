@@ -2341,18 +2341,13 @@ function closeDetail(){ document.getElementById('detailOverlay').classList.remov
 // EXPORT SHARE
 // ═══════════════════════════════════════
 function exportShare(){
-  // 현재 HTML 소스를 가져와서 products 데이터만 교체 후 다운로드
-  // 렌더링된 카드 HTML은 제외하고 원본 구조만 캡처 (파일 크기 축소)
   const gridEl = document.getElementById('grid');
   const savedHTML = gridEl.innerHTML;
   gridEl.innerHTML = '';
   const src = document.documentElement.outerHTML;
   gridEl.innerHTML = savedHTML;
 
-  // 현재 products 데이터를 직렬화
   const dataStr = JSON.stringify(products, null, 2);
-
-  // 원본 let products = [...] 블록을 현재 데이터로 교체
   const exported = src.replace(
     /let products = \[[\s\S]*?\];(\s*\/\/ ═)/,
     `let products = ${dataStr};\n$1`
@@ -2360,13 +2355,34 @@ function exportShare(){
 
   const blob = new Blob([exported], { type:'text/html;charset=utf-8' });
   const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
   const now  = new Date();
   const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-  a.href     = url;
-  a.download = `product-catalog-${stamp}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const filename = `product-catalog-${stamp}.html`;
+
+  // iOS 감지 - 다운로드 대신 새 탭으로 열기
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if(isIOS){
+    const newTab = window.open(url, '_blank');
+    if(newTab){
+      // 새 탭 열린 경우 안내 표시
+      setTimeout(()=>{
+        alert('화면 하단 공유버튼(↑) → "파일에 저장" → index.html 로 이름 변경 후 GitHub에 업로드하세요.');
+        URL.revokeObjectURL(url);
+      }, 500);
+    } else {
+      // 팝업 차단된 경우 링크 직접 제공
+      const a = document.createElement('a');
+      a.href = url; a.target = '_blank'; a.textContent = '파일 열기 (탭하세요)';
+      a.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e3a5f;color:white;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:700;z-index:9999;text-decoration:none;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+      document.body.appendChild(a);
+      setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 15000);
+    }
+  } else {
+    // 데스크탑 - 일반 다운로드
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
 }
 
 // ═══════════════════════════════════════
