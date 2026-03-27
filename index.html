@@ -432,9 +432,12 @@ body.admin-on .admin-editor { display:block; }
 /* ── MOBILE (≤640px) ── */
 @media(max-width:640px){
   /* layout */
+  body { width: 100%; overflow-x: hidden; }
+  .main { width: 100%; display: block; overflow-x: hidden; }
   .header { padding:10px 14px; }
-  .filter-bar,.grid-container { padding-left:14px; padding-right:14px; }
-  .grid { grid-template-columns:1fr; }
+  .filter-bar { padding-left:14px; padding-right:14px; }
+  .grid-container { width: 100%; padding-left:14px; padding-right:14px; box-sizing: border-box; }
+  .grid { grid-template-columns:1fr; width: 100%; }
   .sidebar { display: none; }
   .mobile-filter-btn { display: inline-flex; align-items: center; justify-content: center; }
   .sg   { grid-template-columns:1fr; }
